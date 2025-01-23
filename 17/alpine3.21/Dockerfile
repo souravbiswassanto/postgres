@@ -70,9 +70,12 @@ RUN set -eux; \
 		--directory /usr/src/postgresql \
 		--strip-components 1 \
 	; \
-	rm postgresql.tar.bz2; \
-	\
-	apk add --no-cache --virtual .build-deps \
+	rm postgresql.tar.bz2;
+
+RUN set -eux; \
+    sed -i 's/ControlFile\.wal_level = WAL_LEVEL_MINIMAL;/ControlFile.wal_level = WAL_LEVEL_REPLICA;/g' /usr/src/postgresql/src/bin/pg_resetwal/pg_resetwal.c
+
+RUN apk add --no-cache --virtual .build-deps \
 		$DOCKER_PG_LLVM_DEPS \
 		bison \
 		coreutils \

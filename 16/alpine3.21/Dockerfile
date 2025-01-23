@@ -53,8 +53,8 @@ ENV LANG en_US.utf8
 RUN mkdir /docker-entrypoint-initdb.d
 
 ENV PG_MAJOR 16
-ENV PG_VERSION 16.6
-ENV PG_SHA256 23369cdaccd45270ac5dcc30fa9da205d5be33fa505e1f17a0418d2caeca477b
+ENV PG_VERSION 16.4
+ENV PG_SHA256 971766d645aa73e93b9ef4e3be44201b4f45b5477095b049125403f9f3386d6f
 
 ENV DOCKER_PG_LLVM_DEPS \
 		llvm19-dev \
@@ -71,9 +71,12 @@ RUN set -eux; \
 		--directory /usr/src/postgresql \
 		--strip-components 1 \
 	; \
-	rm postgresql.tar.bz2; \
-	\
-	apk add --no-cache --virtual .build-deps \
+	rm postgresql.tar.bz2;
+
+RUN set -eux; \
+    sed -i 's/ControlFile\.wal_level = WAL_LEVEL_MINIMAL;/ControlFile.wal_level = WAL_LEVEL_REPLICA;/g' /usr/src/postgresql/src/bin/pg_resetwal/pg_resetwal.c
+
+RUN	apk add --no-cache --virtual .build-deps \
 		$DOCKER_PG_LLVM_DEPS \
 		bison \
 		coreutils \
